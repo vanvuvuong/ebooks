@@ -1,0 +1,3 @@
+[submodule "Math-for-Programmers/Math-for-Programmers"]
+	path = Math-for-Programmers/Math-for-Programmers
+	url = git@github.com:vanvuvuong/Math-for-Programmers.git

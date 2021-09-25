@@ -1,0 +1,18 @@
+FROM alpine:3.8
+
+LABEL mainternance "Kris Hydre"
+LABEL description "Local testing image for the Apache2 with PHP version 7"
+
+ENV PHP_VERSION 7
+
+RUN apk add --update apache2 php${PHP_VERSION}-apache2 php${PHP_VERSION} && \
+	rm -rf /var/cache/apk/* && \
+	mkdir /var/run/apache/ && \
+	rm -rf /var/www/localhost/htdocs/index.html && \
+	echo "<?php phpinfo(); ?>" > /var/www/localhost/htdocs/index.php && \
+	chmod 755 /var/www/localhost/htdocs/index.php
+
+EXPOSE 80/tcp
+
+ENTRYPOINT ["httpd"]
+CMD ["-D", "FOREGROUND"]

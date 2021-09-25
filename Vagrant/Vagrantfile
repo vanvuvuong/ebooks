@@ -1,0 +1,53 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+    config.vm.box = "ubuntu/bionic64"
+    config.vm.box_check_update = false
+
+    config.vm.network "private_network", ip: "192.168.33.10"
+    config.vm.network :forwarded_port, guest: 22, host: 6666, id: "ssh", auto_correct: true
+    # config.vm.network "public_network"
+
+    config.vm.synced_folder "./shared", "/vagrant_data"
+    # config.vm.synced_folder "../Dropbox", "/dropbox"
+    config.disksize.size = '6GB'
+
+    config.vm.hostname = "ebisu-pusher"
+
+    config.vm.provider "virtualbox" do |vb|
+      vb.memory = "5120"
+    end
+
+    config.vm.provision "shell", inline: <<-SHELL
+      apt-get update -y
+      update-alternatives --list python
+      update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+      python --version
+      apt-get install -y python3-pip python3-venv python3-setuptools
+      update-alternatives --list pip
+      update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+
+      apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+      apt install -y build-essential language-pack-en-base gcc libsm6 libxext6 libxrender-dev cmake libglib2.0-0 libleptonica-dev libtesseract-dev automake pkg-config libsdl-pango-dev libicu-dev libcairo2-dev bc
+      apt-get install -y software-properties-common --no-install-recommends
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+      apt-key fingerprint 0EBFCD88
+      add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+      apt-get update -y
+      apt-get install -y docker-ce docker-ce-cli containerd.io
+      apt-get install -y tesseract-ocr libtesseract-dev
+      echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+      curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+      sudo apt-get -y update && sudo apt-get -y install google-cloud-sdk
+
+      pip install setuptools docker-compose
+
+      curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+      sudo apt-get install -y nodejs
+      jupyter labextension install @jupyter-widgets/jupyterlab-manager
+
+      sudo addgroup -a vagrant docker
+    SHELL
+  end
